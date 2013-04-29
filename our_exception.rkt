@@ -24,19 +24,29 @@
 
 (define (throw exception)
   (if (empty? *handlers*)
+      ;se non esiste handler lancio un errore
       (error "EXCEPTION" (send exception get-message))
+      ;se esiste handler lo poppo e lo eseguo
       ((pop-h))))
 
 (define-syntax try
   (syntax-rules (catch)
     ((try (exp1 ...) catch (exp2 ...))
      (begin
-     (call/cc (lambda (cont)
-                (push-h (lambda () (cont 
-                                    (begin exp2 ...))))
-                (let ((result (begin exp1 ...)))
-                  (pop-h)
-                  result)))))))
+       (call/cc (lambda (cont)
+                  ;salva un handler contenente la continuazione
+                  ;e il codiche della catch
+                  ;sarà eseguito se si verifica una throw
+                  (push-h (lambda () (cont 
+                                      (begin exp2 ...))))
+                  
+                  ;eseguo il codice della try
+                  (let ((result (begin exp1 ...)))
+                    ;se non c'è stata eccezzione arrivo qui
+                    ;ho installato un handler che non serve
+                    ;poppo l'handler senza eseguirl
+                    (pop-h)
+                    result)))))))
 
 (define (foo)
   (throw (new exception% (message "Generic exception thrown"))))
@@ -45,4 +55,4 @@
 (foo)
 
 (+ 1 (try ((foo))
-            catch (1)))
+          catch (1)))
