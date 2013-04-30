@@ -23,17 +23,17 @@
 
 (define handler%
   (class object%
-    (init name proc)   
-    (define current-name name)
-    (define current-proc proc) 
+    (init handled-ex proc)   
+    (define self-handled-ex handled-ex)
+    (define self-proc proc) 
     (super-new)
     
-    (define/public (get-name)
-      current-name)
+    (define/public (get-handled-ex)
+      self-handled-ex)
     
     ;; execute handler procedure
-    (define/public (exe-proc exception)
-      (current-proc exception))))
+    (define/public (exec-proc ex)
+      (self-proc ex))))
 
 ;; ----- Handlers  ----- ;;
 (define *handlers* (list))
@@ -46,11 +46,22 @@
     (set! *handlers* (cdr *handlers*))
     handler))
 
-(define (throw exception)
+(define (read-handlers)
+  (car *handlers*))
+
+(define (can-handle? exception)
   (if (empty? *handlers*)
-      (error (string-append (send exception get-name) ": " (send exception get-message)))
+      #f
+      (let ([handled-ex (read-handlers)])
+        (if (is-a? exception (send handled-ex get-handled-ex))
+            #t
+            #f))))
+
+(define (throw exception)
+  (if (can-handle? exception)
       ;execute handler giving him the thrown exception
-      (send (pop-handler) exe-proc exception)))
+      (send (pop-handler) exec-proc exception)
+      (error (string-append (send exception get-name) ": " (send exception get-message)))))
 
 (define-syntax try
   (syntax-rules (catch)
@@ -60,7 +71,7 @@
                   ;handler% object push
                   (push-handler 
                    (new handler%
-                        [name exception]
+                        [handled-ex exception]
                         [proc (lambda (e) 
                                   (continuation 
                                    (begin expr2 ...)))]))
@@ -76,6 +87,9 @@
     [(< x 0) (throw (new negative-number-exception% [message "negative numbers are not allowed"]))]
     [else (display "here's your x: ") (display x) (newline)]))
 
+(define (generic-foo)
+    (throw (new exception% [name "GENERIC EXCEPTION"] [message "generic error"])))
+
 (try
  [(displayln "(foo 4)")
   (foo 4)] ;will not throw any exception
@@ -89,3 +103,17 @@
  catch (negative-number-exception% nnex)
  [(display "exception thrown with message: ")
   (send nnex get-message)])
+
+(try
+ [(displayln "(foo -4)")
+  (foo -4)] ;will throw negative-number-exception%
+ catch (exception% e)
+ [(display "exception thrown with message: ")
+  (send e get-message)])
+
+(try
+ [(displayln "(generic-foo)")
+  (generic-foo)] ;will throw exception%
+ catch (exception% e)
+ [(display "exception thrown with message: ")
+  (send e get-message)])
