@@ -1,820 +1,134 @@
-#reader(lib"read.ss""wxme")WXME0108 ## 
-#|
-   This file uses the GRacket editor format.
-   Open this file in DrRacket version 5.3.3 or later to read it.
+#lang racket
+;we require the standard library for classes and objects
+(require racket/class)
 
-   Most likely, it was created by saving a program in DrRacket,
-   and it probably contains a program with non-text elements
-   (such as images or comment boxes).
+;the handler class
+;every handler contains:
+;- the class of the exception to be handled
+;- the lambda of the real oprations to be done (the real handler)
+(define handler%
+  (class object%
+    (super-new)
+    (init class handler)
+    (field (self-class class))
+    (field (self-handler handler))
+    (define/public (get-class) self-class)
+    (define/public (get-handler) self-handler)))
 
-            http://racket-lang.org/
-|#
- 30 7 #"wxtext\0"
-3 1 6 #"wxtab\0"
-1 1 8 #"wximage\0"
-2 0 8 #"wxmedia\0"
-4 1 34 #"(lib \"syntax-browser.ss\" \"mrlib\")\0"
-1 0 16 #"drscheme:number\0"
-3 0 44 #"(lib \"number-snip.ss\" \"drscheme\" \"private\")\0"
-1 0 36 #"(lib \"comment-snip.ss\" \"framework\")\0"
-1 0 93
-(
- #"((lib \"collapsed-snipclass.ss\" \"framework\") (lib \"collapsed-sni"
- #"pclass-wxme.ss\" \"framework\"))\0"
-) 0 0 43 #"(lib \"collapsed-snipclass.ss\" \"framework\")\0"
-0 0 19 #"drscheme:sexp-snip\0"
-0 0 36 #"(lib \"cache-image-snip.ss\" \"mrlib\")\0"
-1 0 68
-(
- #"((lib \"image-core.ss\" \"mrlib\") (lib \"image-core-wxme.rkt\" \"mr"
- #"lib\"))\0"
-) 1 0 29 #"drscheme:bindings-snipclass%\0"
-1 0 88
-(
- #"((lib \"pict-snip.rkt\" \"drracket\" \"private\") (lib \"pict-snip.r"
- #"kt\" \"drracket\" \"private\"))\0"
-) 0 0 33 #"(lib \"bullet-snip.ss\" \"browser\")\0"
-0 0 25 #"(lib \"matrix.ss\" \"htdp\")\0"
-1 0 22 #"drscheme:lambda-snip%\0"
-1 0 26 #"drracket:spacer-snipclass\0"
-0 0 57
-#"(lib \"hrule-snip.rkt\" \"macro-debugger\" \"syntax-browser\")\0"
-1 0 26 #"drscheme:pict-value-snip%\0"
-0 0 45 #"(lib \"image-snipr.ss\" \"slideshow\" \"private\")\0"
-1 0 38 #"(lib \"pict-snipclass.ss\" \"slideshow\")\0"
-2 0 55 #"(lib \"vertical-separator-snip.ss\" \"stepper\" \"private\")\0"
-1 0 18 #"drscheme:xml-snip\0"
-1 0 31 #"(lib \"xml-snipclass.ss\" \"xml\")\0"
-1 0 21 #"drscheme:scheme-snip\0"
-2 0 34 #"(lib \"scheme-snipclass.ss\" \"xml\")\0"
-1 0 10 #"text-box%\0"
-1 0 32 #"(lib \"text-snipclass.ss\" \"xml\")\0"
-1 0 1 6 #"wxloc\0"
-          0 0 56 0 1 #"\0"
-0 75 1 #"\0"
-0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 0 9
-#"Standard\0"
-0 75 10 #"Monospace\0"
-0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 -1 -1 2 24
-#"framework:default-color\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 150 0 150 0 0 0 -1 -1 2 15
-#"text:ports out\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 150 0 150 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 93 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 255 0 0 0 0 0 -1
--1 2 15 #"text:ports err\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 93 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 255 0 0 0 0 0 -1
--1 2 1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 175 0 0 0 -1 -1 2 17
-#"text:ports value\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 175 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
--1 2 27 #"Matching Parenthesis Style\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
--1 2 1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 37
-#"framework:syntax-color:scheme:symbol\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 38
-#"framework:syntax-color:scheme:keyword\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 194 116 31 0 0 0 -1 -1 2
-38 #"framework:syntax-color:scheme:comment\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 194 116 31 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 37
-#"framework:syntax-color:scheme:string\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 39
-#"framework:syntax-color:scheme:constant\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 132 60 36 0 0 0 -1 -1 2 42
-#"framework:syntax-color:scheme:parenthesis\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 132 60 36 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 36
-#"framework:syntax-color:scheme:error\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 36
-#"framework:syntax-color:scheme:other\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 16
-#"Misspelled Text\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 81 112 203 0 0 0 -1 -1 2
-38 #"drracket:check-syntax:lexically-bound\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 81 112 203 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 28
-#"drracket:check-syntax:set!d\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 37
-#"drracket:check-syntax:unused-require\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 36
-#"drracket:check-syntax:free-variable\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 68 0 203 0 0 0 -1 -1 2 31
-#"drracket:check-syntax:imported\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 68 0 203 0 0 0 -1 -1 2 47
-#"drracket:check-syntax:my-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 116 0 0 0 0 -1 -1 2 50
-#"drracket:check-syntax:their-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 116 0 0 0 0 -1 -1 2 48
-#"drracket:check-syntax:unk-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 139 142 28 0 0 0 -1 -1 2
-49 #"drracket:check-syntax:both-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 139 142 28 0 0 0 -1 -1 2
-26 #"plt:htdp:test-coverage-on\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 1 0 0 0 0 0 0 255 165 0 0 0 0 -1 -1 2 27
-#"plt:htdp:test-coverage-off\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 1 0 0 0 0 0 0 255 165 0 0 0 0 -1 -1 4 1
-#"\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 4 #"XML\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 2 1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 34 139 34 0 0 0 -1 -1 2 37
-#"plt:module-language:test-coverage-on\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 34 139 34 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 176 48 96 0 0 0 -1 -1 2 38
-#"plt:module-language:test-coverage-off\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 176 48 96 0 0 0 -1 -1 4 1
-#"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
--1 4 1 #"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
--1 4 1 #"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 100 0 0 0 0 -1
--1 0 1 #"\0"
-0 75 10 #"Monospace\0"
-0.0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
-255 255 1 -1           0 372 0 26 3 12 #"#lang racket"
-0 0 22 29 1 #"\n"
-0 0 17 3 56 #";we require the standard library for classes and objects"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 14 3 7 #"require"
-0 0 22 3 1 #" "
-0 0 14 3 12 #"racket/class"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 18 #";the handler class"
-0 0 22 29 1 #"\n"
-0 0 17 3 24 #";every handler contains:"
-0 0 22 29 1 #"\n"
-0 0 17 3 43 #";- the class of the exception to be handled"
-0 0 22 29 1 #"\n"
-0 0 17 3 65
-#";- the lambda of the real oprations to be done (the real handler)"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 1 #" "
-0 0 14 3 8 #"handler%"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 15 3 5 #"class"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"object%"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 9 #"super-new"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 4 #"init"
-0 0 22 3 1 #" "
-0 0 15 3 5 #"class"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"handler"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 5 #"field"
-0 0 22 3 2 #" ("
-0 0 14 3 10 #"self-class"
-0 0 22 3 1 #" "
-0 0 15 3 5 #"class"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 5 #"field"
-0 0 22 3 2 #" ("
-0 0 14 3 12 #"self-handler"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"handler"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 15 3 13 #"define/public"
-0 0 22 3 2 #" ("
-0 0 14 3 9 #"get-class"
-0 0 22 3 2 #") "
-0 0 14 3 10 #"self-class"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 15 3 13 #"define/public"
-0 0 22 3 2 #" ("
-0 0 14 3 11 #"get-handler"
-0 0 22 3 2 #") "
-0 0 14 3 12 #"self-handler"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 43 #";code for the stack which contains handlers"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 1 #" "
-0 0 20 3 1 #"'"
-0 0 22 3 3 #"())"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 6 #"push-h"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"handler"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 14 3 4 #"set!"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"cons"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"handler"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 5 #"pop-h"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 15 3 3 #"let"
-0 0 22 3 3 #" (("
-0 0 14 3 7 #"handler"
-0 0 22 3 2 #" ("
-0 0 14 3 3 #"car"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 4 #"set!"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 2 #" ("
-0 0 14 3 3 #"cdr"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 4 #"    "
-0 0 14 3 7 #"handler"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 48 #";only reads the first handler without popping it"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 6 #"read-h"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 14 3 3 #"car"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 13 #";throw method"
-0 0 22 29 1 #"\n"
-0 0 17 3 69
-(
- #";boolean function to understand if we can handle the exception throw"
- #"n"
-) 0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 11 #"can-handle?"
-0 0 22 3 1 #" "
-0 0 14 3 9 #"exception"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 14 3 2 #"if"
-0 0 22 3 2 #" ("
-0 0 14 3 6 #"empty?"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"*handlers*"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 6 #"      "
-0 0 20 3 2 #"#f"
-0 0 22 3 1 #" "
-0 0 17 3 31 #";no handlers... we can't handle"
-0 0 22 29 1 #"\n"
-0 0 22 3 7 #"      ("
-0 0 15 3 3 #"let"
-0 0 22 3 3 #" (("
-0 0 14 3 1 #"h"
-0 0 22 3 2 #" ("
-0 0 14 3 6 #"read-h"
-0 0 22 3 4 #"))) "
-0 0 17 3 30 #";there is at least one handler"
-0 0 22 29 1 #"\n"
-0 0 22 3 9 #"        ("
-0 0 14 3 2 #"if"
-0 0 22 3 2 #" ("
-0 0 14 3 5 #"is-a?"
-0 0 22 3 1 #" "
-0 0 14 3 9 #"exception"
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"send"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"h"
-0 0 22 3 1 #" "
-0 0 14 3 9 #"get-class"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 12 #"            "
-0 0 17 3 67
-#";is the catch-exception's class a superclass (or the same class as)"
-0 0 22 29 1 #"\n"
-0 0 22 3 12 #"            "
-0 0 17 3 33 #";of the thrown-exception's class?"
-0 0 22 29 1 #"\n"
-0 0 22 3 12 #"            "
-0 0 20 3 2 #"#t"
-0 0 22 29 1 #"\n"
-0 0 22 3 12 #"            "
-0 0 20 3 2 #"#f"
-0 0 22 3 4 #"))))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 5 #"throw"
-0 0 22 3 1 #" "
-0 0 14 3 9 #"exception"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 14 3 2 #"if"
-0 0 22 3 2 #" ("
-0 0 14 3 11 #"can-handle?"
-0 0 22 3 1 #" "
-0 0 14 3 9 #"exception"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 8 #"      (("
-0 0 14 3 4 #"send"
-0 0 22 3 2 #" ("
-0 0 14 3 5 #"pop-h"
-0 0 22 3 2 #") "
-0 0 14 3 11 #"get-handler"
-0 0 22 3 2 #") "
-0 0 14 3 9 #"exception"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 7 #"      ("
-0 0 14 3 5 #"error"
-0 0 22 3 1 #" "
-0 0 19 3 12 #"\"EXCEPTION:\""
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"send"
-0 0 22 3 1 #" "
-0 0 14 3 9 #"exception"
-0 0 22 3 1 #" "
-0 0 14 3 11 #"get-message"
-0 0 22 3 4 #"))))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 24 #";try-catch block (MACRO)"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 13 #"define-syntax"
-0 0 22 3 1 #" "
-0 0 14 3 3 #"try"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 15 3 12 #"syntax-rules"
-0 0 22 3 2 #" ("
-0 0 15 3 5 #"catch"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 6 #"    (("
-0 0 14 3 3 #"try"
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"exp1"
-0 0 22 3 1 #" "
-0 0 14 3 3 #"..."
-0 0 22 3 2 #") "
-0 0 15 3 5 #"catch"
-0 0 22 3 3 #" (("
-0 0 14 3 8 #"ex-class"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"ex-name"
-0 0 22 3 4 #")) ("
-0 0 14 3 4 #"exp2"
-0 0 22 3 1 #" "
-0 0 14 3 3 #"..."
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 6 #"     ("
-0 0 14 3 7 #"call/cc"
-0 0 22 3 2 #" ("
-0 0 15 3 6 #"lambda"
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"cont"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 16 #"                "
-0 0 17 3 21 #";create a new handler"
-0 0 22 29 1 #"\n"
-0 0 22 3 17 #"                ("
-0 0 15 3 3 #"let"
-0 0 22 3 3 #" (("
-0 0 14 3 1 #"h"
-0 0 22 3 2 #" ("
-0 0 14 3 3 #"new"
-0 0 22 3 1 #" "
-0 0 14 3 8 #"handler%"
-0 0 22 29 1 #"\n"
-0 0 22 3 30 #"                             ("
-0 0 15 3 5 #"class"
-0 0 22 3 1 #" "
-0 0 14 3 8 #"ex-class"
-0 0 22 3 3 #") ("
-0 0 14 3 7 #"handler"
-0 0 22 3 1 #" "
-0 0 22 29 1 #"\n"
-0 0 22 3 48 #"                                               ("
-0 0 15 3 6 #"lambda"
-0 0 22 3 2 #" ("
-0 0 14 3 7 #"ex-name"
-0 0 22 3 3 #") ("
-0 0 14 3 4 #"cont"
-0 0 22 3 1 #" "
-0 0 22 29 1 #"\n"
-0 0 22 3 60
-#"                                                           ("
-0 0 15 3 5 #"begin"
-0 0 22 3 1 #" "
-0 0 14 3 4 #"exp2"
-0 0 22 3 1 #" "
-0 0 14 3 3 #"..."
-0 0 22 3 7 #")))))))"
-0 0 22 29 1 #"\n"
-0 0 22 3 16 #"                "
-0 0 17 3 17 #";push the handler"
-0 0 22 29 1 #"\n"
-0 0 22 3 17 #"                ("
-0 0 14 3 6 #"push-h"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"h"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 17 #"                ("
-0 0 15 3 3 #"let"
-0 0 22 3 3 #" (("
-0 0 14 3 6 #"result"
-0 0 22 3 2 #" ("
-0 0 15 3 5 #"begin"
-0 0 22 3 1 #" "
-0 0 14 3 4 #"exp1"
-0 0 22 3 1 #" "
-0 0 14 3 3 #"..."
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 3 19 #"                  ("
-0 0 14 3 5 #"pop-h"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 18 #"                  "
-0 0 14 3 6 #"result"
-0 0 22 3 7 #")))))))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 26 #";some examples of classes;"
-0 0 22 29 1 #"\n"
-0 7         445 4           0 0           0 73 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"exception%"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 15 3 5 #"class"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"object%"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 9 #"super-new"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 4 #"init"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"message"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 5 #"field"
-0 0 22 3 2 #" ("
-0 0 14 3 12 #"self-message"
-0 0 22 3 1 #" "
-0 0 14 3 7 #"message"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 15 3 13 #"define/public"
-0 0 22 3 2 #" ("
-0 0 14 3 11 #"get-message"
-0 0 22 3 2 #") "
-0 0 14 3 12 #"self-message"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 1 #" "
-0 0 14 3 16 #"pippo-exception%"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 15 3 5 #"class"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"exception%"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 9 #"super-new"
-0 0 22 3 2 #" ("
-0 0 14 3 7 #"message"
-0 0 22 3 1 #" "
-0 0 19 3 17 #"\"pippo exception\""
-0 0 22 3 4 #"))))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 1 #" "
-0 0 14 3 16 #"pluto-exception%"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 15 3 5 #"class"
-0 0 22 3 1 #" "
-0 0 14 3 10 #"exception%"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"    ("
-0 0 14 3 9 #"super-new"
-0 0 22 3 2 #" ("
-0 0 14 3 7 #"message"
-0 0 22 3 1 #" "
-0 0 19 3 17 #"\"pluto exception\""
-0 0 22 3 4 #"))))"
-0           0 0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 17 3 17 #";examples of use:"
-0 0 22 29 1 #"\n"
-0 7         925 4           0 0           0 153 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 5 #"pippo"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 14 3 5 #"throw"
-0 0 22 3 2 #" ("
-0 0 14 3 3 #"new"
-0 0 22 3 1 #" "
-0 0 14 3 16 #"pippo-exception%"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 22 3 2 #" ("
-0 0 14 3 5 #"pluto"
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 3 #"  ("
-0 0 14 3 5 #"throw"
-0 0 22 3 2 #" ("
-0 0 14 3 3 #"new"
-0 0 22 3 1 #" "
-0 0 14 3 16 #"pluto-exception%"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 14 3 1 #"+"
-0 0 22 3 1 #" "
-0 0 20 3 1 #"1"
-0 0 22 3 2 #" ("
-0 0 14 3 3 #"try"
-0 0 22 3 3 #" (("
-0 0 14 3 5 #"pluto"
-0 0 22 3 3 #") ("
-0 0 14 3 5 #"pippo"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 12 #"            "
-0 0 15 3 5 #"catch"
-0 0 22 3 3 #" (("
-0 0 14 3 16 #"pluto-exception%"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 4 #")) ("
-0 0 20 3 1 #"1"
-0 0 22 3 3 #")))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 14 3 3 #"try"
-0 0 22 3 3 #" (("
-0 0 14 3 5 #"pippo"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 5 #"     "
-0 0 15 3 5 #"catch"
-0 0 22 3 3 #" (("
-0 0 14 3 16 #"pippo-exception%"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 7 #"     (("
-0 0 14 3 9 #"displayln"
-0 0 22 3 1 #" "
-0 0 19 3 14 #"\"pippo caught\""
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 6 #"     ("
-0 0 14 3 3 #"try"
-0 0 22 3 3 #" (("
-0 0 14 3 5 #"pluto"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 10 #"          "
-0 0 15 3 5 #"catch"
-0 0 22 3 3 #" (("
-0 0 14 3 16 #"pluto-exception%"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 12 #"          (("
-0 0 14 3 9 #"displayln"
-0 0 22 3 1 #" "
-0 0 19 3 14 #"\"pluto caught\""
-0 0 22 3 5 #")))))"
-0 0 22 29 1 #"\n"
-0 0 22 29 1 #"\n"
-0 0 22 3 1 #"("
-0 0 14 3 3 #"try"
-0 0 22 3 3 #" (("
-0 0 14 3 5 #"pippo"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 7 #"       "
-0 0 15 3 5 #"catch"
-0 0 22 3 3 #" (("
-0 0 14 3 16 #"pippo-exception%"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 9 #"       (("
-0 0 14 3 7 #"display"
-0 0 22 3 1 #" "
-0 0 19 3 16 #"\"pippo caught: \""
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 9 #"        ("
-0 0 14 3 9 #"displayln"
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"send"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 1 #" "
-0 0 14 3 11 #"get-message"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 9 #"        ("
-0 0 14 3 3 #"try"
-0 0 22 3 3 #" (("
-0 0 14 3 5 #"pluto"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 13 #"             "
-0 0 15 3 5 #"catch"
-0 0 22 3 3 #" (("
-0 0 14 3 16 #"pluto-exception%"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 2 #"))"
-0 0 22 29 1 #"\n"
-0 0 22 3 15 #"             (("
-0 0 14 3 7 #"display"
-0 0 22 3 1 #" "
-0 0 19 3 16 #"\"pluto caught: \""
-0 0 22 3 1 #")"
-0 0 22 29 1 #"\n"
-0 0 22 3 15 #"              ("
-0 0 14 3 9 #"displayln"
-0 0 22 3 2 #" ("
-0 0 14 3 4 #"send"
-0 0 22 3 1 #" "
-0 0 14 3 1 #"e"
-0 0 22 3 1 #" "
-0 0 14 3 11 #"get-message"
-0 0 22 3 6 #"))))))"
-0           0 0           0
+;code for the stack which contains handlers
+(define *handlers* '())
+
+(define (push-h handler)
+  (set! *handlers* (cons handler *handlers*)))
+
+(define (pop-h)
+  (let ((handler (car *handlers*)))
+    (set! *handlers* (cdr *handlers*))
+    handler))
+
+;only reads the first handler without popping it
+(define (read-h)
+  (car *handlers*))
+
+;empties the list
+(define (flush-h)
+  (set! *handlers* '()))
+
+;throw method
+;boolean function to understand if we can handle the exception thrown
+(define (can-handle? exception)
+      (let ((h (read-h))) ;there is at least one handler
+        (is-a? exception (send h get-class)))
+            ;is the catch-exception's class a superclass (or the same class as)
+            ;of the thrown-exception's class?
+  )
+
+(define (throw exception)
+  (if (empty? *handlers*) ;no handlers... we can't handle
+      (error "EXCEPTION:" (send exception get-message))
+      (if (can-handle? exception)
+          ((send (pop-h) get-handler) exception)
+          (begin
+            (pop-h)
+            (throw exception)))))
+
+;try-catch block (MACRO)
+(define-syntax try
+  (syntax-rules (catch)
+    ((try (exp1 ...) catch ((ex-class ex-name)) (exp2 ...))
+     (call/cc (lambda (cont)
+                ;create a new handler
+                (let ((h (new handler%
+                             (class ex-class) (handler 
+                                               (lambda (ex-name) (cont 
+                                                           (begin exp2 ...)))))))
+                ;push the handler
+                (push-h h)
+                (let ((result (begin exp1 ...)))
+                  (pop-h)
+                  result)))))))
+
+
+
+
+
+
+
+;some examples of classes;
+(define exception%
+  (class object%
+    (super-new)
+    (init message)
+    (field (self-message message))
+    (define/public (get-message) self-message)))
+
+(define pippo-exception%
+  (class exception%
+    (super-new (message "pippo exception"))))
+
+(define pluto-exception%
+  (class exception%
+    (super-new (message "pluto exception"))))
+
+(define paperino-exception%
+  (class exception%
+    (super-new (message "paperino exception"))))
+
+;examples of use:
+(define (pippo)
+  (throw (new pippo-exception%)))
+
+(define (pluto)
+  (throw (new pluto-exception%)))
+
+(define (paperino)
+  (throw (new paperino-exception%)))
+
+(+ 1 (try ((pluto) (pippo))
+            catch ((pluto-exception% e)) (1)))
+
+(try ((pippo))
+     catch ((pippo-exception% e))
+     ((displayln "pippo caught")
+     (try ((pluto))
+          catch ((pluto-exception% e))
+          ((displayln "pluto caught")))))
+
+(try ((pippo))
+       catch ((pippo-exception% e))
+       ((display "pippo caught: ")
+        (displayln (send e get-message))
+        (try ((pluto))
+             catch ((pluto-exception% e))
+             ((display "pluto caught: ")
+              (displayln (send e get-message))))))
+
+(try (
+     (try (
+           (try ((paperino))
+                catch ((pluto-exception% e))
+                ((displayln "third catch"))))
+          catch ((pluto-exception% e))
+          ((displayln "second catch"))))
+     catch ((paperino-exception% e))
+     ((displayln "first catch")))
