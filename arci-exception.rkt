@@ -53,15 +53,18 @@
   (if (empty? *handlers*)
       #f
       (let ([handled-ex (read-handlers)])
-        (if (is-a? exception (send handled-ex get-handled-ex))
-            #t
-            #f))))
+        (is-a? exception (send handled-ex get-handled-ex)))))
 
 (define (throw exception)
+  (if (empty? *handlers*)
+      (error (string-append (send exception get-name) ": " (send exception get-message)))
   (if (can-handle? exception)
       ;execute handler giving him the thrown exception
       (send (pop-handler) exec-proc exception)
-      (error (string-append (send exception get-name) ": " (send exception get-message)))))
+      (begin 
+        ;non handable, re-throwing
+        (pop-handler)
+        (throw exception)))))
 
 (define-syntax try
   (syntax-rules (catch)
@@ -90,6 +93,12 @@
 (define (generic-foo)
     (throw (new exception% [name "GENERIC EXCEPTION"] [message "generic error"])))
 
+(define pippo-exception%
+  (class exception%
+    (init message)
+    (define current-message message)
+    (super-new [name "Pippo!"] [message current-message])))
+ 
 (try
  [(displayln "(foo 4)")
   (foo 4)] ;will not throw any exception
@@ -117,3 +126,46 @@
  catch (exception% e)
  [(display "exception thrown with message: ")
   (send e get-message)])
+
+;; ----- Nested Try ---- ;;
+(try
+ ((try
+   [(display "provo pippo: ")
+    (throw (new pippo-exception%
+                [message "pippo error"]))]
+   catch (negative-number-exception% nnex)
+   [(display "negative exception thrown with message: ")
+    (send nnex get-message)]))
+ catch (pippo-exception% e)
+ [(display "pippo exception thrown with message: ")
+  (send e get-message)])
+
+(try
+ ((try
+    ((try
+      [(display "3th level: ")
+       (throw (new pippo-exception%
+                   [message "pippo error"]))]
+      catch (negative-number-exception% nnex)
+      [(display "exception thrown with message: ")
+       (send nnex get-message)]))
+    catch (exception% e)
+    [(displayln "exception caught")]))
+ catch (pippo-exception% e)
+ [(display "exception thrown with message: ")
+  (send e get-message)])
+
+;exception throw and never catched (will cause error!)
+#|
+(try
+ ((try
+   [(display "no one will catch correctly: ")
+    (throw (new pippo-exception%
+                [message "pippo error"]))]
+   catch (negative-number-exception% nnex)
+   [(display "exception thrown with message: ")
+    (send nnex get-message)]))
+ catch (negative-number-exception% nnex)
+ [(display "exception thrown with message: ")
+  (send nnex get-message)])
+|#
